@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+﻿using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -11,23 +7,38 @@ namespace CHIP8
 {
     public partial class Display : Form
     {
-        public static int scalar = 10;
+        //Init chip
+        Chip c = new Chip();
+
+        Rectangle[,] pixels = new Rectangle[64, 32];
+
+
         public Display()
         {
             InitializeComponent();
 
-            //Init chip
-            Chip c = new Chip();
-
             //load the program into the chip
             c.loadProgram(@"D:\Downloads\pong2.c8");
+
+            //init for window
+            displayGrid.Image = new Bitmap(displayGrid.Width, displayGrid.Height);
+
+            for (int x = 0; x < 64; x++)
+            {
+                for (int y = 0; y < 32; y++)
+                {
+                    //set the positions for each rect
+                    pixels[x, y] = new Rectangle(x * 10, y * 10, x * 10 + 10, y * 10 + 10);
+                }
+            }
 
             //infinite loop for the chip to run on
             for (;;)
             {
                 c.run();
-                if(c.needsRedraw())
+                if (c.needsRedraw())
                 {
+                    Debug.WriteLine("REDRAWING");
                     display();
                     c.removeDrawFlag();
                 }
@@ -37,17 +48,23 @@ namespace CHIP8
 
         public void display()
         {
-            if (displayGrid.Image == null)
-            {
-                displayGrid.Image = new Bitmap(displayGrid.Width, displayGrid.Height);
-            }
             using (Graphics g = Graphics.FromImage(displayGrid.Image))
             {
                 // draw black background
                 g.Clear(Color.Black);
-                Rectangle rect = new Rectangle(0, 0, 10, 10);
-                g.FillRectangle(new SolidBrush(Color.White), rect);
-                //g.DrawRectangle(Pens.Black, rect);
+
+                byte[] disp = c.getDisplay();
+                for (int i = 0; i < (64 * 32); i++)
+                {
+                    if(disp[i] == 1)
+                    {
+                        g.FillRectangle(new SolidBrush(Color.White), pixels[i % 64, i % 32]);
+                    }
+                    else
+                    {
+                        g.FillRectangle(new SolidBrush(Color.Black), pixels[i % 64, i % 32]);
+                    }
+                }
             }
             displayGrid.Invalidate();
     }
