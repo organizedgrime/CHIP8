@@ -1,0 +1,9 @@
+c:\users\nico\documents\visual studio 2015\Projects\CHIP8\CHIP8\bin\Debug\CHIP8.exe.config
+c:\users\nico\documents\visual studio 2015\Projects\CHIP8\CHIP8\obj\Debug\CHIP8.csprojResolveAssemblyReference.cache
+c:\users\nico\documents\visual studio 2015\Projects\CHIP8\CHIP8\obj\Debug\CHIP8.Display.resources
+c:\users\nico\documents\visual studio 2015\Projects\CHIP8\CHIP8\obj\Debug\CHIP8.Properties.Resources.resources
+c:\users\nico\documents\visual studio 2015\Projects\CHIP8\CHIP8\obj\Debug\CHIP8.csproj.GenerateResource.Cache
+c:\users\nico\documents\visual studio 2015\Projects\CHIP8\CHIP8\bin\Debug\CHIP8.exe
+c:\users\nico\documents\visual studio 2015\Projects\CHIP8\CHIP8\bin\Debug\CHIP8.pdb
+c:\users\nico\documents\visual studio 2015\Projects\CHIP8\CHIP8\obj\Debug\CHIP8.exe
+c:\users\nico\documents\visual studio 2015\Projects\CHIP8\CHIP8\obj\Debug\CHIP8.pdb
