@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
@@ -16,7 +17,7 @@ namespace CHIP8
         public Display()
         {
             InitializeComponent();
-
+            chipWorker.RunWorkerAsync(null);
             //load the program into the chip
             c.loadProgram(@"D:\Downloads\pong2.c8");
 
@@ -33,17 +34,6 @@ namespace CHIP8
             }
 
             //infinite loop for the chip to run on
-            for (;;)
-            {
-                c.run();
-                if (c.needsRedraw())
-                {
-                    Debug.WriteLine("REDRAWING");
-                    display();
-                    c.removeDrawFlag();
-                }
-                Thread.Sleep(16);
-            }
         }
 
         public void display()
@@ -67,7 +57,20 @@ namespace CHIP8
                 }
             }
             displayGrid.Invalidate();
-    }
-
+        }
+        private void chipWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            for (;;)
+            {
+                c.run();
+                if (c.needsRedraw())
+                {
+                    Debug.WriteLine("REDRAWING");
+                    display();
+                    c.removeDrawFlag();
+                }
+                Thread.Sleep(16); //60 hertz
+            }
+        }
     }
 }
