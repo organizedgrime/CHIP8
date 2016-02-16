@@ -13,7 +13,6 @@ namespace CHIP8
 
         Rectangle[,] pixels = new Rectangle[64, 32];
 
-
         public Display()
         {
             InitializeComponent();
@@ -32,8 +31,6 @@ namespace CHIP8
                     pixels[x, y] = new Rectangle(x * 10, y * 10, x * 10 + 10, y * 10 + 10);
                 }
             }
-
-            //infinite loop for the chip to run on
         }
 
         public void display()
@@ -44,22 +41,31 @@ namespace CHIP8
                 g.Clear(Color.Black);
 
                 byte[] disp = c.getDisplay();
-                for (int i = 0; i < (64 * 32); i++)
+
+                int count = 0;
+
+                for (int x = 0; x < 64; x++)
                 {
-                    if(disp[i] == 1)
+                    for (int y = 0; y < 32; y++)
                     {
-                        g.FillRectangle(new SolidBrush(Color.White), pixels[i % 64, i % 32]);
-                    }
-                    else
-                    {
-                        g.FillRectangle(new SolidBrush(Color.Black), pixels[i % 64, i % 32]);
+                        if (disp[count] == 1)
+                        {
+                            g.FillRectangle(new SolidBrush(Color.White), pixels[x, y]);
+                        }
+                        else
+                        {
+                            g.FillRectangle(new SolidBrush(Color.Black), pixels[x, y]);
+                        }
+                        count++;
                     }
                 }
             }
             displayGrid.Invalidate();
         }
+
         private void chipWorker_DoWork(object sender, DoWorkEventArgs e)
         {
+            //infinite loop for the chip to run on
             for (;;)
             {
                 c.run();
@@ -71,6 +77,13 @@ namespace CHIP8
                 }
                 Thread.Sleep(16); //60 hertz
             }
+        }
+
+        //keypress event
+        private void Display_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            c.setKey(e.KeyChar);
+            //Debug.WriteLine("KEY PRESSED: " + (int)e.KeyChar);
         }
     }
 }

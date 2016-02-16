@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace CHIP8
@@ -13,6 +14,11 @@ namespace CHIP8
 
         private bool needRedraw = false;
 
+        private char keyPressed;
+
+        //for opcodes involving random numbers
+        private Random rand = new Random();
+
         public void run()
         {
             //fetch opcode
@@ -24,10 +30,10 @@ namespace CHIP8
             {
                 //switch through first bit
                 case 0x0000:
-                    switch (opcode & 0x000F)
+                    switch (opcode & 0x00FF)
                     {
-                        case 0x0000: //00E0	Clears the screen.
-                            for(int i = 0; i < display.Length; i++)
+                        case 0x00E0: //00E0	Clears the screen.
+                            for (int i = 0; i < display.Length; i++)
                             {
                                 display[i] = 0;
                             }
@@ -35,8 +41,12 @@ namespace CHIP8
                             needRedraw = true;
                             break;
 
-                        case 0x000E: //00EE	Returns from a subroutine.
-                            pc = (char)(stack[stackpointer--] + 2);
+                        case 0x00EE: //00EE	Returns from a subroutine.
+                            if (stackpointer > 0)
+                                stackpointer--;
+                            Debug.WriteLine("INDEX:::" + stackpointer);
+                            pc = (char)(stack[stackpointer] + 2);
+                            Debug.WriteLine("RET TO: " + ((int)pc).ToString("X4"));
                             break;
 
                         default:
@@ -56,7 +66,7 @@ namespace CHIP8
                     break;
 
                 case 0x3000: //3XNN	Skips the next instruction if VX equals NN.
-                    if(V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF))
+                    if (V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF))
                     {
                         //skip next instruction
                         pc += (char)0x04;
@@ -80,7 +90,7 @@ namespace CHIP8
                     break;
 
                 case 0x5000: //5XY0	Skips the next instruction if VX equals VY.
-                    if(V[(opcode & 0x0F00) >> 8] == (opcode & 0x00F0) >> 4)
+                    if (V[(opcode & 0x0F00) >> 8] == (opcode & 0x00F0) >> 4)
                     {
                         //skip next instruction
                         pc += (char)0x04;
@@ -144,7 +154,7 @@ namespace CHIP8
                     break;
 
                 case 0x9000: //9XY0	Skips the next instruction if VX doesn't equal VY.
-                    if(V[(opcode & 0x0F00) >> 8] != V[(opcode * 0x00F0) >> 4])
+                    if (V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4])
                     {
                         pc += (char)0x04;
                     }
@@ -159,6 +169,11 @@ namespace CHIP8
                     pc += (char)0x02;
                     break;
 
+                case 0xC000: //CXNN	Sets VX to the result of a bitwise and operation on a random number and NN.
+                    V[(opcode & 0x0F00) >> 8] = (char)(rand.Next(0, 0xFF + 1) & (opcode & 0x00FF));
+                    pc += (char)0x02;
+                    break;
+
                 case 0xD000: //DXYN: Draw a sprite (VX, VY) size (8, N). Sprite is located at I.
                     //Set variables for future reference
                     int VX = V[(opcode & 0x0F00) >> 8], VY = V[(opcode & 0x00F0) >> 4], N = (opcode & 0x000F);
@@ -167,12 +182,104 @@ namespace CHIP8
                     V[0xF] = (char)0x0;
 
                     //Draw via XOR
+                    int pixel, line, totalX, totalY, index;
+                    for (int y = 0; y < N; y++)
+                    {
+                        line = memory[I + y];
+                        for (int x = 0; x < 8; x++)
+                        {
+                            pixel = line & (0x80 >> x);
+                            if (pixel != 0)
+                            {
+                                totalX = VX + x;
+                                totalY = VY + y;
 
+                                totalX = totalX % 64;
+                                totalY = totalY % 32;
+
+                                index = (totalY * 64) + totalX;
+
+                                if (display[index] == 1)
+                                    V[0xF] = (char)1;
+
+                                display[index] ^= 1;
+                            }
+                        }
+                    }
 
                     //Check collision and set V[0xF]
                     //Read the image from I
                     pc += (char)0x02;
                     needRedraw = true;
+                    break;
+
+                case 0xE000:
+                    switch (opcode & 0x00FF)
+                    {
+                        case 0x009E: //EX9E	Skips the next instruction if the key stored in VX is pressed.
+                            if (V[(opcode & 0x0F00) >> 8] == keyPressed)
+                            {
+                                pc += (char)0x02;
+                            }
+                            else
+                            {
+                                pc += (char)0x04;
+                            }
+                            break;
+                        case 0x00A1: //EXA1	Skips the next instruction if the key stored in VX isn't pressed.
+                            if (V[(opcode & 0x0F00) >> 8] != keyPressed)
+                            {
+                                pc += (char)0x02;
+                            }
+                            else
+                            {
+                                pc += (char)0x04;
+                            }
+                            break;
+                    }
+                    break;
+
+                case 0xF000:
+                    switch (opcode & 0x00FF)
+                    {
+                        case 0x0007: //FX07	Sets VX to the value of the delay timer.
+                            V[(opcode & 0x0F00) >> 8] = (char)delay_timer;
+                            pc += (char)0x02;
+                            break;
+
+                        case 0x000A: //FX0A	A key press is awaited, and then stored in VX.
+                            break;
+
+                        case 0x0015: //FX15	Sets the delay timer to VX.
+                            delay_timer = V[(opcode & 0x0F00) >> 8];
+                            pc += (char)0x02;
+                            break;
+
+                        case 0x0018: //FX18	Sets the sound timer to VX.
+                            break;
+
+                        case 0x001E: //FX1E Adds VX to I.
+                            I += V[(opcode & 0x0F00) >> 8];
+                            pc += (char)0x02;
+                            break;
+
+                        case 0x0029: //FX29	Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font.
+                            break;
+
+                        case 0x0033: //FX33	TODO
+                            break;
+
+                        case 0x0055: //FX55	Stores V0 to VX in memory starting at address I.
+                            break;
+
+                        case 0x0065: //FX65	Fills V0 to VX with values from memory starting at address I.
+                            break;
+
+                        default:
+                            Debug.WriteLine("Unsupported Opcode!");
+                            System.Windows.Forms.Application.Exit();
+                            break;
+                    }
                     break;
                 default:
                     Debug.WriteLine("Unsupported Opcode!");
@@ -195,6 +302,10 @@ namespace CHIP8
         {
             needRedraw = false;
         }
+        public void setKey(char k)
+        {
+            keyPressed = k;
+        }
 
         public void loadProgram(string filename)
         {
@@ -204,7 +315,7 @@ namespace CHIP8
                 for (int i = 0; i < program.Length; i++)
                 {
                     memory[0x200 + i] = (char)(program[i] & 0xFF);
-                    //Debug.WriteLine(String.Format(@"\x{0:x4}", (ushort)memory[0x200 + i]));
+                    //Debug.WriteLine("PROG: " +((int)(program[i])).ToString("X4"));
                 }
             }
             else
