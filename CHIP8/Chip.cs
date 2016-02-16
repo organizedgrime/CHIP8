@@ -57,7 +57,7 @@ namespace CHIP8
                     break;
 
                 case 0x1000: //1NNN	Jumps to address NNN.
-                    pc += (char)0x02;
+                    pc = (char)(opcode & 0xFFF);
                     break;
 
                 case 0x2000: //2NNN	Calls subroutine at NNN.
@@ -116,34 +116,68 @@ namespace CHIP8
                     switch (opcode & 0x000F)
                     {
                         case 0x0000: //8XY0	Sets VX to the value of VY.
-                            V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4];
+                            V[(opcode & 0x0F00) >> 8] = (char)V[(opcode & 0x00F0) >> 4];
                             pc += (char)0x02;
                             break;
+
                         case 0x0001: //8XY1	Sets VX to VX or VY.
                             V[(opcode & 0x0F00) >> 8] = (char)(V[(opcode & 0x0F00) >> 8] | V[(opcode & 0x00F0) >> 4]);
                             pc += (char)0x02;
                             break;
+
                         case 0x0002: //8XY2	Sets VX to VX and VY.
                             V[(opcode & 0x0F00) >> 8] = (char)(V[(opcode & 0x0F00) >> 8] & V[(opcode & 0x00F0) >> 4]);
                             pc += (char)0x02;
                             break;
+
                         case 0x0003: //8XY3	Sets VX to VX xor VY.
                             V[(opcode & 0x0F00) >> 8] = (char)(V[(opcode & 0x0F00) >> 8] ^ V[(opcode & 0x00F0) >> 4]);
                             pc += (char)0x02;
                             break;
+
                         case 0x0004: //8XY4	Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't.
+                            int carry = V[(opcode & 0x0F00) >> 8] & V[(opcode & 0x00F0) >> 4];
+                            if (carry == 1)
+                            {
+                                V[0xF] = (char)1;
+                            }
+                            else
+                            {
+                                V[0xF] = (char)0;
+                            }
+                            V[(opcode & 0x0F00) >> 8] = (char)((V[(opcode & 0x0F00) >> 8] + V[(opcode & 0x00F0) >> 4]) & 0xFF);
                             pc += (char)0x02;
                             break;
+
                         case 0x0005: //8XY5	VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
                             pc += (char)0x02;
                             break;
+
                         case 0x0006: //8XY6	Shifts VX right by one. VF is set to the value of the least significant bit of VX before the shift.
+                            V[0xF] = (char)(V[(opcode & 0x0F00) >> 8] & 0x1);
+                            V[(opcode & 0x0F00) >> 8] = (char)(V[(opcode & 0x0F00) >> 8] >> 1);
                             pc += (char)0x02;
                             break;
+
                         case 0x0007: //8XY7	Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
+
+                            if (V[(opcode & 0x0F00) >> 8] > V[(opcode & 0x00F0) >> 4])
+                            {
+                                V[0xF] = (char)0;
+                            }
+                            else
+                            {
+                                V[0xF] = (char)1;
+                            }
+
+                            V[(opcode & 0x0F00) >> 8] = (char)((V[(opcode & 0x00F0) >> 4]) - (V[(opcode & 0x0F00) >> 8]) & 0xFF);
+
                             pc += (char)0x02;
                             break;
+
                         case 0x000E: //8XYE	Shifts VX left by one. VF is set to the value of the most significant bit of VX before the shift.
+                            V[0xF] = (char)(V[(opcode & 0x0F00) >> 8] & 0x8);
+                            V[(opcode & 0x0F00) >> 8] = (char)(V[(opcode & 0x0F00) >> 8] << 1);
                             pc += (char)0x02;
                             break;
                         default:
@@ -176,14 +210,14 @@ namespace CHIP8
 
                 case 0xD000: //DXYN: Draw a sprite (VX, VY) size (8, N). Sprite is located at I.
                     //Set variables for future reference
-                    int VX = V[(opcode & 0x0F00) >> 8], VY = V[(opcode & 0x00F0) >> 4], N = (opcode & 0x000F);
+                    //int VX = , VY = , N = (opcode & 0x000F);
 
                     //Set collision flag to false by default
                     V[0xF] = (char)0x0;
 
                     //Draw via XOR
                     int pixel, line, totalX, totalY, index;
-                    for (int y = 0; y < N; y++)
+                    for (int y = 0; y < (opcode & 0x000F); y++)
                     {
                         line = memory[I + y];
                         for (int x = 0; x < 8; x++)
@@ -191,8 +225,8 @@ namespace CHIP8
                             pixel = line & (0x80 >> x);
                             if (pixel != 0)
                             {
-                                totalX = VX + x;
-                                totalY = VY + y;
+                                totalX = V[(opcode & 0x0F00) >> 8] + x;
+                                totalY = V[(opcode & 0x00F0) >> 4] + y;
 
                                 totalX = totalX % 64;
                                 totalY = totalY % 32;

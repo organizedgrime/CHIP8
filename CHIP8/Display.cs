@@ -18,7 +18,7 @@ namespace CHIP8
             InitializeComponent();
             chipWorker.RunWorkerAsync(null);
             //load the program into the chip
-            c.loadProgram(@"D:\Downloads\pong2.c8");
+            c.loadProgram(@"D:\Downloads\tetris.c8");
 
             //init for window
             displayGrid.Image = new Bitmap(displayGrid.Width, displayGrid.Height);
