@@ -136,8 +136,8 @@ namespace CHIP8
                             break;
 
                         case 0x0004: //8XY4	Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't.
-                            int carry = V[(opcode & 0x0F00) >> 8] & V[(opcode & 0x00F0) >> 4];
-                            if (carry == 1)
+                            //check for carry
+                            if ((V[(opcode & 0x0F00) >> 8] > 0xFF - V[(opcode & 0x00F0) >> 4]))
                             {
                                 V[0xF] = (char)1;
                             }
@@ -150,6 +150,15 @@ namespace CHIP8
                             break;
 
                         case 0x0005: //8XY5	VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
+                            if((V[(opcode & 0x0F00) >> 8]) > (V[(opcode & 0x00F0) >> 4]))
+                            {
+                                V[0xF] = (char)1;
+                            }
+                            else
+                            {
+                                V[0xF] = (char)0;
+                            }
+                            V[(opcode & 0x0F00) >> 8] = (char)(((V[(opcode & 0x0F00) >> 8]) - (V[(opcode & 0x00F0) >> 4])) & 0xFF);
                             pc += (char)0x02;
                             break;
 
@@ -160,7 +169,6 @@ namespace CHIP8
                             break;
 
                         case 0x0007: //8XY7	Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
-
                             if (V[(opcode & 0x0F00) >> 8] > V[(opcode & 0x00F0) >> 4])
                             {
                                 V[0xF] = (char)0;
@@ -260,6 +268,7 @@ namespace CHIP8
                                 pc += (char)0x04;
                             }
                             break;
+
                         case 0x00A1: //EXA1	Skips the next instruction if the key stored in VX isn't pressed.
                             if (V[(opcode & 0x0F00) >> 8] != keyPressed)
                             {
@@ -282,6 +291,8 @@ namespace CHIP8
                             break;
 
                         case 0x000A: //FX0A	A key press is awaited, and then stored in VX.
+                            V[(opcode & 0x0F00) >> 8] = keyPressed;
+                            pc += (char)0x02;
                             break;
 
                         case 0x0015: //FX15	Sets the delay timer to VX.
@@ -290,6 +301,7 @@ namespace CHIP8
                             break;
 
                         case 0x0018: //FX18	Sets the sound timer to VX.
+                            sound_timer = V[(opcode & 0x0F00) >> 8];
                             break;
 
                         case 0x001E: //FX1E Adds VX to I.
@@ -298,15 +310,36 @@ namespace CHIP8
                             break;
 
                         case 0x0029: //FX29	Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font.
+                            I = (char)(0x050 + (V[(opcode & 0x0F00) >> 8] * 5));
+                            pc += (char)0x02;
                             break;
 
-                        case 0x0033: //FX33	TODO
+                        case 0x0033: //FX33	Stores the MSB of VX at the address stored in I, middle digit at I + 1, and LSB at I + 2.
+                            int value = V[(opcode & 0x0F00) >> 8];
+                            int hundreds = (value - (value % 100)) / 100;
+                            value -= hundreds * 100;
+                            int tens = (value - (value % 10)) / 10;
+                            value -= tens * 10;
+                            memory[I] = (char)hundreds;
+                            memory[I + 1] = (char)tens;
+                            memory[I + 2] = (char)value;
+                            pc += (char)0x02;
                             break;
 
                         case 0x0055: //FX55	Stores V0 to VX in memory starting at address I.
+                            for (int i = 0; i <= ((opcode & 0x0F00) >> 8); i++)
+                            {
+                                memory[I + i] = V[i];
+                            }
+                            pc += (char)0x02;
                             break;
 
                         case 0x0065: //FX65	Fills V0 to VX with values from memory starting at address I.
+                            for(int i = 0; i <= ((opcode & 0x0F00) >> 8); i++)
+                            {
+                                V[i] = memory[I + i];
+                            }
+                            pc += (char)0x02;
                             break;
 
                         default:
