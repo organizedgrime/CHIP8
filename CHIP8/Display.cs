@@ -41,7 +41,7 @@ namespace CHIP8
                 g.Clear(Color.Black);
 
                 byte[] disp = c.getDisplay();
-
+                Debug.WriteLine(string.Join("", disp));
                 int count = 0;
 
                 for (int x = 0; x < 64; x++)
@@ -83,7 +83,7 @@ namespace CHIP8
         private void Display_KeyPress(object sender, KeyPressEventArgs e)
         {
             c.setKey(e.KeyChar);
-            //Debug.WriteLine("KEY PRESSED: " + (int)e.KeyChar);
+            Debug.WriteLine("KEY PRESSED: " + (int)e.KeyChar);
         }
     }
 }

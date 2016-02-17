@@ -23,7 +23,7 @@ namespace CHIP8
         {
             //fetch opcode
             char opcode = (char)((memory[pc] << 8) | memory[pc + 1]);
-            Debug.WriteLine("OPCODE: " + ((int)opcode).ToString("X4"));
+            //Debug.WriteLine("OPCODE: " + ((int)opcode).ToString("X4"));
 
             //decode opcode
             switch (opcode & 0xF000)
@@ -113,85 +113,88 @@ namespace CHIP8
 
                 case 0x8000:
                     //switch through last bit
-                    switch (opcode & 0x000F)
                     {
-                        case 0x0000: //8XY0	Sets VX to the value of VY.
-                            V[(opcode & 0x0F00) >> 8] = (char)V[(opcode & 0x00F0) >> 4];
-                            pc += (char)0x02;
-                            break;
+                        int VX = V[(opcode & 0x0F00) >> 8], VY = V[(opcode & 0x00F0) >> 4];
+                        switch (opcode & 0x000F)
+                        {
+                            case 0x0000: //8XY0	Sets VX to the value of VY.
+                                V[(opcode & 0x0F00) >> 8] = (char)VY;
+                                pc += (char)0x02;
+                                break;
 
-                        case 0x0001: //8XY1	Sets VX to VX or VY.
-                            V[(opcode & 0x0F00) >> 8] = (char)(V[(opcode & 0x0F00) >> 8] | V[(opcode & 0x00F0) >> 4]);
-                            pc += (char)0x02;
-                            break;
+                            case 0x0001: //8XY1	Sets VX to VX or VY.
+                                V[(opcode & 0x0F00) >> 8] = (char)(VX | VY);
+                                pc += (char)0x02;
+                                break;
 
-                        case 0x0002: //8XY2	Sets VX to VX and VY.
-                            V[(opcode & 0x0F00) >> 8] = (char)(V[(opcode & 0x0F00) >> 8] & V[(opcode & 0x00F0) >> 4]);
-                            pc += (char)0x02;
-                            break;
+                            case 0x0002: //8XY2	Sets VX to VX and VY.
+                                V[(opcode & 0x0F00) >> 8] = (char)(VX & VY);
+                                pc += (char)0x02;
+                                break;
 
-                        case 0x0003: //8XY3	Sets VX to VX xor VY.
-                            V[(opcode & 0x0F00) >> 8] = (char)(V[(opcode & 0x0F00) >> 8] ^ V[(opcode & 0x00F0) >> 4]);
-                            pc += (char)0x02;
-                            break;
+                            case 0x0003: //8XY3	Sets VX to VX xor VY.
+                                V[(opcode & 0x0F00) >> 8] = (char)(VX ^ VY);
+                                pc += (char)0x02;
+                                break;
 
-                        case 0x0004: //8XY4	Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't.
-                            //check for carry
-                            if ((V[(opcode & 0x0F00) >> 8] > 0xFF - V[(opcode & 0x00F0) >> 4]))
-                            {
-                                V[0xF] = (char)1;
-                            }
-                            else
-                            {
-                                V[0xF] = (char)0;
-                            }
-                            V[(opcode & 0x0F00) >> 8] = (char)((V[(opcode & 0x0F00) >> 8] + V[(opcode & 0x00F0) >> 4]) & 0xFF);
-                            pc += (char)0x02;
-                            break;
+                            case 0x0004: //8XY4	Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't.
+                                         //check for carry
+                                if (VX > 0xFF - VY)
+                                {
+                                    V[0xF] = (char)1;
+                                }
+                                else
+                                {
+                                    V[0xF] = (char)0;
+                                }
+                                V[(opcode & 0x0F00) >> 8] = (char)((VX + VY) & 0xFF);
+                                pc += (char)0x02;
+                                break;
 
-                        case 0x0005: //8XY5	VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
-                            if((V[(opcode & 0x0F00) >> 8]) > (V[(opcode & 0x00F0) >> 4]))
-                            {
-                                V[0xF] = (char)1;
-                            }
-                            else
-                            {
-                                V[0xF] = (char)0;
-                            }
-                            V[(opcode & 0x0F00) >> 8] = (char)(((V[(opcode & 0x0F00) >> 8]) - (V[(opcode & 0x00F0) >> 4])) & 0xFF);
-                            pc += (char)0x02;
-                            break;
+                            case 0x0005: //8XY5	VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
+                                if (VX > VY)
+                                {
+                                    V[0xF] = (char)1;
+                                }
+                                else
+                                {
+                                    V[0xF] = (char)0;
+                                }
+                                V[(opcode & 0x0F00) >> 8] = (char)((VX - VY) & 0xFF);
+                                pc += (char)0x02;
+                                break;
 
-                        case 0x0006: //8XY6	Shifts VX right by one. VF is set to the value of the least significant bit of VX before the shift.
-                            V[0xF] = (char)(V[(opcode & 0x0F00) >> 8] & 0x1);
-                            V[(opcode & 0x0F00) >> 8] = (char)(V[(opcode & 0x0F00) >> 8] >> 1);
-                            pc += (char)0x02;
-                            break;
+                            case 0x0006: //8XY6	Shifts VX right by one. VF is set to the value of the least significant bit of VX before the shift.
+                                V[0xF] = (char)(V[(opcode & 0x0F00) >> 8] & 0x1);
+                                V[(opcode & 0x0F00) >> 8] = (char)(VX >> 1);
+                                pc += (char)0x02;
+                                break;
 
-                        case 0x0007: //8XY7	Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
-                            if (V[(opcode & 0x0F00) >> 8] > V[(opcode & 0x00F0) >> 4])
-                            {
-                                V[0xF] = (char)0;
-                            }
-                            else
-                            {
-                                V[0xF] = (char)1;
-                            }
+                            case 0x0007: //8XY7	Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
+                                if (VX > VY)
+                                {
+                                    V[0xF] = (char)0;
+                                }
+                                else
+                                {
+                                    V[0xF] = (char)1;
+                                }
 
-                            V[(opcode & 0x0F00) >> 8] = (char)((V[(opcode & 0x00F0) >> 4]) - (V[(opcode & 0x0F00) >> 8]) & 0xFF);
+                                V[(opcode & 0x0F00) >> 8] = (char)((VY - VX) & 0xFF);
+                                pc += (char)0x02;
+                                break;
 
-                            pc += (char)0x02;
-                            break;
+                            case 0x000E: //8XYE	Shifts VX left by one. VF is set to the value of the most significant bit of VX before the shift.
+                                V[0xF] = (char)(VX & 0x8);
+                                V[(opcode & 0x0F00) >> 8] = (char)(VX << 1);
+                                pc += (char)0x02;
+                                break;
 
-                        case 0x000E: //8XYE	Shifts VX left by one. VF is set to the value of the most significant bit of VX before the shift.
-                            V[0xF] = (char)(V[(opcode & 0x0F00) >> 8] & 0x8);
-                            V[(opcode & 0x0F00) >> 8] = (char)(V[(opcode & 0x0F00) >> 8] << 1);
-                            pc += (char)0x02;
-                            break;
-                        default:
-                            Debug.WriteLine("Unsupported Opcode!");
-                            System.Windows.Forms.Application.Exit();
-                            break;
+                            default:
+                                Debug.WriteLine("Unsupported Opcode!");
+                                System.Windows.Forms.Application.Exit();
+                                break;
+                        }
                     }
                     break;
 
@@ -218,37 +221,27 @@ namespace CHIP8
 
                 case 0xD000: //DXYN: Draw a sprite (VX, VY) size (8, N). Sprite is located at I.
                     //Set variables for future reference
-                    //int VX = , VY = , N = (opcode & 0x000F);
-
                     //Set collision flag to false by default
                     V[0xF] = (char)0x0;
 
                     //Draw via XOR
-                    int pixel, line, totalX, totalY, index;
-                    for (int y = 0; y < (opcode & 0x000F); y++)
                     {
-                        line = memory[I + y];
-                        for (int x = 0; x < 8; x++)
+                        int index;
+                        for (int y = 0; y < (opcode & 0x000F); y++)
                         {
-                            pixel = line & (0x80 >> x);
-                            if (pixel != 0)
+                            for (int x = 0; x < 8; x++)
                             {
-                                totalX = V[(opcode & 0x0F00) >> 8] + x;
-                                totalY = V[(opcode & 0x00F0) >> 4] + y;
+                                if ((memory[I + y] & (0x80 >> x)) != 0)
+                                {
+                                    index = (((V[(opcode & 0x00F0) >> 4] + y) % 32) * 64) + ((V[(opcode & 0x0F00) >> 8] + x) % 64);
+                                    if (display[index] == 1)
+                                        V[0xF] = (char)1;
 
-                                totalX = totalX % 64;
-                                totalY = totalY % 32;
-
-                                index = (totalY * 64) + totalX;
-
-                                if (display[index] == 1)
-                                    V[0xF] = (char)1;
-
-                                display[index] ^= 1;
+                                    display[index] ^= 1;
+                                }
                             }
                         }
                     }
-
                     //Check collision and set V[0xF]
                     //Read the image from I
                     pc += (char)0x02;
@@ -256,96 +249,103 @@ namespace CHIP8
                     break;
 
                 case 0xE000:
-                    switch (opcode & 0x00FF)
                     {
-                        case 0x009E: //EX9E	Skips the next instruction if the key stored in VX is pressed.
-                            if (V[(opcode & 0x0F00) >> 8] == keyPressed)
-                            {
-                                pc += (char)0x02;
-                            }
-                            else
-                            {
-                                pc += (char)0x04;
-                            }
-                            break;
+                        int VX = V[(opcode & 0x0F00) >> 8];
+                        switch (opcode & 0x00FF)
+                        {
+                            case 0x009E: //EX9E	Skips the next instruction if the key stored in VX is pressed.
+                                if (VX == keyPressed)
+                                {
+                                    pc += (char)0x02;
+                                }
+                                else
+                                {
+                                    pc += (char)0x04;
+                                }
+                                break;
 
-                        case 0x00A1: //EXA1	Skips the next instruction if the key stored in VX isn't pressed.
-                            if (V[(opcode & 0x0F00) >> 8] != keyPressed)
-                            {
-                                pc += (char)0x02;
-                            }
-                            else
-                            {
-                                pc += (char)0x04;
-                            }
-                            break;
+                            case 0x00A1: //EXA1	Skips the next instruction if the key stored in VX isn't pressed.
+                                if (VX != keyPressed)
+                                {
+                                    pc += (char)0x02;
+                                }
+                                else
+                                {
+                                    pc += (char)0x04;
+                                }
+                                break;
+                        }
                     }
                     break;
 
                 case 0xF000:
-                    switch (opcode & 0x00FF)
                     {
-                        case 0x0007: //FX07	Sets VX to the value of the delay timer.
-                            V[(opcode & 0x0F00) >> 8] = (char)delay_timer;
-                            pc += (char)0x02;
-                            break;
+                        int VX = V[(opcode & 0x0F00) >> 8];
+                        switch (opcode & 0x00FF)
+                        {
+                            case 0x0007: //FX07	Sets VX to the value of the delay timer.
+                                V[(opcode & 0x0F00) >> 8] = (char)delay_timer;
+                                pc += (char)0x02;
+                                break;
 
-                        case 0x000A: //FX0A	A key press is awaited, and then stored in VX.
-                            V[(opcode & 0x0F00) >> 8] = keyPressed;
-                            pc += (char)0x02;
-                            break;
+                            case 0x000A: //FX0A	A key press is awaited, and then stored in VX.
+                                V[(opcode & 0x0F00) >> 8] = keyPressed;
+                                pc += (char)0x02;
+                                break;
 
-                        case 0x0015: //FX15	Sets the delay timer to VX.
-                            delay_timer = V[(opcode & 0x0F00) >> 8];
-                            pc += (char)0x02;
-                            break;
+                            case 0x0015: //FX15	Sets the delay timer to VX.
+                                delay_timer = VX;
+                                pc += (char)0x02;
+                                break;
 
-                        case 0x0018: //FX18	Sets the sound timer to VX.
-                            sound_timer = V[(opcode & 0x0F00) >> 8];
-                            break;
+                            case 0x0018: //FX18	Sets the sound timer to VX.
+                                sound_timer = VX;
+                                pc += (char)0x02;
+                                break;
 
-                        case 0x001E: //FX1E Adds VX to I.
-                            I += V[(opcode & 0x0F00) >> 8];
-                            pc += (char)0x02;
-                            break;
+                            case 0x001E: //FX1E Adds VX to I.
+                                I += (char)VX;
+                                pc += (char)0x02;
+                                break;
 
-                        case 0x0029: //FX29	Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font.
-                            I = (char)(0x050 + (V[(opcode & 0x0F00) >> 8] * 5));
-                            pc += (char)0x02;
-                            break;
+                            case 0x0029: //FX29	Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font.
+                                I = (char)(0x050 + (VX * 5));
+                                pc += (char)0x02;
+                                break;
 
-                        case 0x0033: //FX33	Stores the MSB of VX at the address stored in I, middle digit at I + 1, and LSB at I + 2.
-                            int value = V[(opcode & 0x0F00) >> 8];
-                            int hundreds = (value - (value % 100)) / 100;
-                            value -= hundreds * 100;
-                            int tens = (value - (value % 10)) / 10;
-                            value -= tens * 10;
-                            memory[I] = (char)hundreds;
-                            memory[I + 1] = (char)tens;
-                            memory[I + 2] = (char)value;
-                            pc += (char)0x02;
-                            break;
+                            case 0x0033: //FX33	Stores the MSB of VX at the address stored in I, middle digit at I + 1, and LSB at I + 2.
+                                int value = VX;
+                                int hundreds = (value - (value % 100)) / 100;
+                                value -= hundreds * 100;
+                                int tens = (value - (value % 10)) / 10;
+                                value -= tens * 10;
+                                memory[I] = (char)hundreds;
+                                memory[I + 1] = (char)tens;
+                                memory[I + 2] = (char)value;
+                                pc += (char)0x02;
+                                break;
 
-                        case 0x0055: //FX55	Stores V0 to VX in memory starting at address I.
-                            for (int i = 0; i <= ((opcode & 0x0F00) >> 8); i++)
-                            {
-                                memory[I + i] = V[i];
-                            }
-                            pc += (char)0x02;
-                            break;
+                            case 0x0055: //FX55	Stores V0 to VX in memory starting at address I.
+                                for (int i = 0; i <= VX; i++)
+                                {
+                                    memory[I + i] = V[i];
+                                }
+                                pc += (char)0x02;
+                                break;
 
-                        case 0x0065: //FX65	Fills V0 to VX with values from memory starting at address I.
-                            for(int i = 0; i <= ((opcode & 0x0F00) >> 8); i++)
-                            {
-                                V[i] = memory[I + i];
-                            }
-                            pc += (char)0x02;
-                            break;
+                            case 0x0065: //FX65	Fills V0 to VX with values from memory starting at address I.
+                                for (int i = 0; i <= VX; i++)
+                                {
+                                    V[i] = memory[I + i];
+                                }
+                                pc += (char)0x02;
+                                break;
 
-                        default:
-                            Debug.WriteLine("Unsupported Opcode!");
-                            System.Windows.Forms.Application.Exit();
-                            break;
+                            default:
+                                Debug.WriteLine("Unsupported Opcode!");
+                                System.Windows.Forms.Application.Exit();
+                                break;
+                        }
                     }
                     break;
                 default:
@@ -388,6 +388,7 @@ namespace CHIP8
             else
             {
                 Debug.WriteLine("FILE NOT FOUND");
+                System.Windows.Forms.Application.Exit();
             }
         }
     }
