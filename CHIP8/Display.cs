@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
@@ -18,7 +19,7 @@ namespace CHIP8
             InitializeComponent();
             chipWorker.RunWorkerAsync(null);
             //load the program into the chip
-            c.loadProgram(@"C:\Users\Nico\Documents\Visual Studio 2015\Projects\CHIP8\GAMES\pong.c8");
+            c.loadProgram(@"C:\Users\Nico\Documents\Visual Studio 2015\Projects\CHIP8\GAMES\pong.ch8");
 
             //init for window
             displayGrid.Image = new Bitmap(displayGrid.Width, displayGrid.Height);
@@ -42,21 +43,17 @@ namespace CHIP8
 
                 byte[] disp = c.getDisplay();
                 //Debug.WriteLine(string.Join("", disp));
-                int count = 0;
 
-                for (int x = 0; x < 64; x++)
+                for (int i = 0; i < disp.Length; i++)
                 {
-                    for (int y = 0; y < 32; y++)
+                    if (disp[i] == 1)
                     {
-                        if (disp[count] == 1)
-                        {
-                            g.FillRectangle(new SolidBrush(Color.White), pixels[x, y]);
-                        }
-                        else
-                        {
-                            g.FillRectangle(new SolidBrush(Color.Black), pixels[x, y]);
-                        }
-                        count++;
+                        Debug.WriteLine("Index: " + i + ", COORDS: " + (i % 64) + ", " + System.Math.Floor((double)(i / 64)));
+                        g.FillRectangle(new SolidBrush(Color.White), pixels[i % 64, (int)Math.Floor((double)(i / 64))]);
+                    }
+                    else
+                    {
+                        g.FillRectangle(new SolidBrush(Color.Black), pixels[i % 64, (int)Math.Floor((double)(i / 64))]);
                     }
                 }
             }
@@ -75,6 +72,7 @@ namespace CHIP8
                     display();
                     c.removeDrawFlag();
                 }
+                //Thread.Sleep(1000); //60 hertz
                 Thread.Sleep(16); //60 hertz
             }
         }

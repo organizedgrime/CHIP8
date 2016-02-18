@@ -227,24 +227,25 @@ namespace CHIP8
                         ushort height = (ushort)(opcode & 0x000F), pixel;
                         int VX = V[(opcode & 0x0F00) >> 8], VY = V[(opcode & 0x00F0) >> 4];
 
-                        V[0xF] = (ushort)0;
-                        for (ushort y_pos = 0; y_pos < height; y_pos++)
+                        V[0xF] = 0;
+                        for (int y_pos = 0; y_pos < height; y_pos++)
                         {
                             pixel = memory[I + y_pos];
-                            for (ushort x_pos = 0; x_pos < 8; x_pos++)
+                            for (int x_pos = 0; x_pos < 8; x_pos++)
                             {
                                 if ((pixel & (0x80 >> x_pos)) != 0)
                                 {
                                     if (display[(VX + x_pos + ((VY + y_pos) * 64))] == 1)
                                     {
-                                        V[0xF] = (ushort)1;
+                                        V[0xF] = 1;
                                     }
-
                                     display[VX + x_pos + ((VY + y_pos) * 64)] ^= 1;
                                 }
                             }
                         }
+                        Debug.WriteLine("Draw a sprite at (" + VX + ", " + VY + ") that has the width of 8 pixels and the height of " + (opcode & 0x000F));
                     }
+
                     needRedraw = true;
                     pc += 0x02;
                     break;
