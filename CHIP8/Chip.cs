@@ -254,11 +254,18 @@ namespace CHIP8
                             {
                                 if ((pixel & (0x80 >> x_pos)) != 0)
                                 {
-                                    if (display[(VX + x_pos + ((VY + y_pos) * 64))] == 1)
+                                    try
                                     {
-                                        V[0xF] = 1;
+                                        if (display[(VX + x_pos + ((VY + y_pos) * 64))] == 1)
+                                        {
+                                            V[0xF] = 1;
+                                        }
+                                        display[VX + x_pos + ((VY + y_pos) * 64)] ^= 1;
                                     }
-                                    display[VX + x_pos + ((VY + y_pos) * 64)] ^= 1;
+                                    catch(Exception e)
+                                    {
+                                        Debug.WriteLine(e.ToString());
+                                    }
                                 }
                             }
                         }
@@ -272,6 +279,7 @@ namespace CHIP8
                 case 0xE000:
                     {
                         int VX = V[(opcode & 0x0F00) >> 8];
+                        Debug.WriteLine("KEY CODE FOR DETECTION: " + VX);
                         switch (opcode & 0x00FF)
                         {
                             case 0x009E: //EX9E	Skips the next instruction if the key stored in VX is pressed.

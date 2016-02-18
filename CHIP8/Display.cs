@@ -17,7 +17,7 @@ namespace CHIP8
         public Display()
         {
             InitializeComponent();
-            chipWorker.RunWorkerAsync(null);
+            
             //load the program into the chip
             c.loadFont();
             c.loadProgram(@"C:\Users\Nico\Documents\Visual Studio 2015\Projects\CHIP8\GAMES\pong.ch8");
@@ -33,6 +33,8 @@ namespace CHIP8
                     pixels[x, y] = new Rectangle(x * 10, y * 10, x * 10 + 10, y * 10 + 10);
                 }
             }
+            display();
+            chipWorker.RunWorkerAsync(null);
         }
 
         public void display()
@@ -75,16 +77,37 @@ namespace CHIP8
                 }
                 //Thread.Sleep(1000); //60 hertz
                 //Thread.Sleep(16); //60 hertz
-                Thread.Sleep(6); //
+                Thread.Sleep(1); //
             }
         }
 
         //keypress event
         private void Display_KeyPress(object sender, KeyPressEventArgs e)
         {
-            c.setKey(e.KeyChar);
-            Debug.WriteLine("KEY PRESSED: " + (int)e.KeyChar);
+            //convert w/a and i/k to chip8
+            char chr = e.KeyChar;
+            if (chr == 'w')
+            {
+                chr = (char)1;
+            }
+            else if (chr == 's')
+            {
+                chr = (char)4;
+            }
+            else if (chr == 'i')
+            {
+                chr = (char)12;
+            }
+            else if (chr == 'k')
+            {
+                chr = (char)13;
+            }
+            c.setKey(chr);
         }
 
-     }
+        private void Display_KeyUp(object sender, KeyEventArgs e)
+        {
+            c.setKey(0);
+        }
+    }
 }

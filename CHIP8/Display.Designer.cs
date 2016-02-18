@@ -56,6 +56,7 @@
             this.Name = "Display";
             this.Text = "Display";
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Display_KeyPress);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Display_KeyUp);
             ((System.ComponentModel.ISupportInitialize)(this.displayGrid)).EndInit();
             this.ResumeLayout(false);
 
