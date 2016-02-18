@@ -16,6 +16,25 @@ namespace CHIP8
 
         private ushort keyPressed;
 
+        int[] font = {
+            0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+	        0x20, 0x60, 0x20, 0x20, 0x70, // 1
+	        0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+	        0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+	        0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+	        0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+	        0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+	        0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+	        0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+	        0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+	        0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+	        0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+	        0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+	        0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+	        0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+	        0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+        };
+
         //for opcodes involving random numbers
         private Random rand = new Random();
 
@@ -316,7 +335,6 @@ namespace CHIP8
                                 break;
 
                             case 0x0033: //FX33	Stores the MSB of VX at the address stored in I, middle digit at I + 1, and LSB at I + 2.
-                                Debug.WriteLine("MEME");
                                 int value = VX;
                                 memory[I] = (ushort)((VX - (VX % 100)) / 100);
                                 memory[I + 1] = (ushort)((-(VX % 100)) - (VX % 100 % 10) / 10);
@@ -388,6 +406,15 @@ namespace CHIP8
             {
                 Debug.WriteLine("FILE NOT FOUND");
                 System.Windows.Forms.Application.Exit();
+            }
+        }
+
+        public void loadFont()
+        {
+            //loads font into memory to be displayed later
+            for (int i = 0; i < font.Length; i++)
+            {
+                memory[0x50 + i] = (char)(font[i] & 0xFF);
             }
         }
     }

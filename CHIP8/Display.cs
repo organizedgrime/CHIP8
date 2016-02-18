@@ -19,6 +19,7 @@ namespace CHIP8
             InitializeComponent();
             chipWorker.RunWorkerAsync(null);
             //load the program into the chip
+            c.loadFont();
             c.loadProgram(@"C:\Users\Nico\Documents\Visual Studio 2015\Projects\CHIP8\GAMES\pong.ch8");
 
             //init for window
@@ -48,7 +49,7 @@ namespace CHIP8
                 {
                     if (disp[i] == 1)
                     {
-                        Debug.WriteLine("Index: " + i + ", COORDS: " + (i % 64) + ", " + System.Math.Floor((double)(i / 64)));
+                        //Debug.WriteLine("Index: " + i + ", COORDS: " + (i % 64) + ", " + System.Math.Floor((double)(i / 64)));
                         g.FillRectangle(new SolidBrush(Color.White), pixels[i % 64, (int)Math.Floor((double)(i / 64))]);
                     }
                     else
