@@ -277,22 +277,24 @@ namespace CHIP8
                             case 0x009E: //EX9E	Skips the next instruction if the key stored in VX is pressed.
                                 if (VX == keyPressed)
                                 {
-                                    pc += 0x02;
+                                    Debug.WriteLine("KEY PRESSED");
+                                    pc += 0x04;
                                 }
                                 else
                                 {
-                                    pc += 0x04;
+                                    pc += 0x02;
                                 }
                                 break;
 
                             case 0x00A1: //EXA1	Skips the next instruction if the key stored in VX isn't pressed.
                                 if (VX != keyPressed)
                                 {
-                                    pc += 0x02;
+                                    pc += 0x04;
                                 }
                                 else
                                 {
-                                    pc += 0x04;
+                                    Debug.WriteLine("KEY PRESSED");
+                                    pc += 0x02;
                                 }
                                 break;
                         }
@@ -370,6 +372,8 @@ namespace CHIP8
                     System.Windows.Forms.Application.Exit();
                     break;
             }
+            if (delay_timer > 0) delay_timer--;
+            if (sound_timer > 0) sound_timer--;
         }
 
         public bool needsRedraw()

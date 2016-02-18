@@ -74,7 +74,8 @@ namespace CHIP8
                     c.removeDrawFlag();
                 }
                 //Thread.Sleep(1000); //60 hertz
-                Thread.Sleep(16); //60 hertz
+                //Thread.Sleep(16); //60 hertz
+                Thread.Sleep(6); //
             }
         }
 
@@ -84,5 +85,6 @@ namespace CHIP8
             c.setKey(e.KeyChar);
             Debug.WriteLine("KEY PRESSED: " + (int)e.KeyChar);
         }
-    }
+
+     }
 }
