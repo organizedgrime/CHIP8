@@ -8,13 +8,13 @@ namespace CHIP8
     {
         //initialization of memory
         private ushort[] memory = new ushort[4096], V = new ushort[16], stack = new ushort[16];
-        private byte[] keys = new byte[16], display = new byte[64 * 32];
+        private byte[] keys = new byte[16];
+        public byte[] display = new byte[64 * 32];
         private ushort I = 0x0, pc = 0x200;
         private int stackpointer = 0, sound_timer = 0, delay_timer = 0;
 
-        private bool needRedraw = false;
-
-        private ushort keyPressed;
+        public bool needRedraw = false;
+        public ushort keyPressed;
 
         int[] font =
         {
@@ -376,31 +376,15 @@ namespace CHIP8
                     System.Windows.Forms.Application.Exit();
                     break;
             }
-            if (delay_timer > 0) delay_timer--;
+            if (delay_timer > 0)
+                delay_timer--;
+
             if (sound_timer > 0)
             {
+                //TODO need to modify this, it stops the game for a bit
                 Console.Beep(2000, 100);
                 sound_timer--;
             }
-        }
-
-        public bool needsRedraw()
-        {
-            return needRedraw;
-        }
-
-        public byte[] getDisplay()
-        {
-            return display;
-        }
-
-        public void removeDrawFlag()
-        {
-            needRedraw = false;
-        }
-        public void setKey(ushort k)
-        {
-            keyPressed = k;
         }
 
         public void loadProgram(string filename)

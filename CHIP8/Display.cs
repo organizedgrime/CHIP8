@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
@@ -14,7 +13,7 @@ namespace CHIP8
 
         Rectangle[,] pixels = new Rectangle[64, 32];
 
-        public static int REFRESHRATE = 1, SCALE = 10;
+        public static int REFRESHRATE = 16, SCALE = 10;
 
         public Display()
         {
@@ -45,7 +44,7 @@ namespace CHIP8
                 // draw black background
                 g.Clear(Color.Black);
 
-                byte[] disp = c.getDisplay();
+                byte[] disp = c.display;
                 //Debug.WriteLine(string.Join("", disp));
 
                 for (int i = 0; i < disp.Length; i++)
@@ -70,11 +69,11 @@ namespace CHIP8
             for (;;)
             {
                 c.run();
-                if (c.needsRedraw())
+                if (c.needRedraw)
                 {
                     //Debug.WriteLine("REDRAWING");
                     display();
-                    c.removeDrawFlag();
+                    c.needRedraw = false;
                 }
                 Thread.Sleep(REFRESHRATE); //Can be changed to determine speed
             }
@@ -84,12 +83,12 @@ namespace CHIP8
         private void Display_KeyPress(object sender, KeyPressEventArgs e)
         {
             //map the key to chip8
-            c.setKey((ushort)"1234qwerasdfzxcv".IndexOf(e.KeyChar));
+            c.keyPressed = (ushort)"1234qwerasdfzxcv".IndexOf(e.KeyChar);
         }
 
         private void Display_KeyUp(object sender, KeyEventArgs e)
         {
-            c.setKey(0);
+            c.keyPressed = 0;
         }
     }
 }
