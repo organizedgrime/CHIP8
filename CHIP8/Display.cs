@@ -18,7 +18,7 @@ namespace CHIP8
             InitializeComponent();
             chipWorker.RunWorkerAsync(null);
             //load the program into the chip
-            c.loadProgram(@"C:\Users\Nico\Documents\Visual Studio 2015\Projects\CHIP8\GAMES\PONG3");
+            c.loadProgram(@"C:\Users\Nico\Documents\Visual Studio 2015\Projects\CHIP8\GAMES\pong.c8");
 
             //init for window
             displayGrid.Image = new Bitmap(displayGrid.Width, displayGrid.Height);
@@ -41,7 +41,7 @@ namespace CHIP8
                 g.Clear(Color.Black);
 
                 byte[] disp = c.getDisplay();
-                Debug.WriteLine(string.Join("", disp));
+                //Debug.WriteLine(string.Join("", disp));
                 int count = 0;
 
                 for (int x = 0; x < 64; x++)
