@@ -16,7 +16,8 @@ namespace CHIP8
 
         private ushort keyPressed;
 
-        int[] font = {
+        int[] font =
+        {
             0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
 	        0x20, 0x60, 0x20, 0x20, 0x70, // 1
 	        0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
@@ -42,7 +43,7 @@ namespace CHIP8
         {
             //fetch opcode
             ushort opcode = (ushort)((memory[pc] << 8) | memory[pc + 1]);
-            Debug.WriteLine("OPCODE: " + ((int)opcode).ToString("X4"));
+            //Debug.WriteLine("OPCODE: " + ((int)opcode).ToString("X4"));
 
             //decode opcode
             switch (opcode & 0xF000)
@@ -65,7 +66,6 @@ namespace CHIP8
                                 stackpointer--;
 
                             pc = (ushort)(stack[stackpointer] + 2);
-                            Debug.WriteLine("RET TO: " + ((int)pc).ToString("X4"));
                             break;
 
                         default:
@@ -160,11 +160,11 @@ namespace CHIP8
                                          //check for carry
                                 if (VX > 0xFF - VY)
                                 {
-                                    V[0xF] = (ushort)1;
+                                    V[0xF] = 1;
                                 }
                                 else
                                 {
-                                    V[0xF] = (ushort)0;
+                                    V[0xF] = 0;
                                 }
                                 V[(opcode & 0x0F00) >> 8] = (ushort)((VX + VY) & 0xFF);
                                 pc += 0x02;
@@ -177,7 +177,7 @@ namespace CHIP8
                                 }
                                 else
                                 {
-                                    V[0xF] = (ushort)0;
+                                    V[0xF] = 0;
                                 }
                                 V[(opcode & 0x0F00) >> 8] = (ushort)((VX - VY) & 0xFF);
                                 pc += 0x02;
@@ -192,11 +192,11 @@ namespace CHIP8
                             case 0x0007: //8XY7	Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
                                 if (VX > VY)
                                 {
-                                    V[0xF] = (ushort)0;
+                                    V[0xF] = 0;
                                 }
                                 else
                                 {
-                                    V[0xF] = (ushort)1;
+                                    V[0xF] = 1;
                                 }
 
                                 V[(opcode & 0x0F00) >> 8] = (ushort)((VY - VX) & 0xFF);
@@ -262,14 +262,14 @@ namespace CHIP8
                                         }
                                         display[VX + x_pos + ((VY + y_pos) * 64)] ^= 1;
                                     }
-                                    catch(Exception e)
+                                    catch (Exception e)
                                     {
                                         Debug.WriteLine(e.ToString());
                                     }
                                 }
                             }
                         }
-                        Debug.WriteLine("Draw a sprite at (" + VX + ", " + VY + ") that has the width of 8 pixels and the height of " + (opcode & 0x000F));
+                        //Debug.WriteLine("Draw a sprite at (" + VX + ", " + VY + ") that has the width of 8 pixels and the height of " + (opcode & 0x000F));
                     }
 
                     needRedraw = true;
@@ -279,13 +279,11 @@ namespace CHIP8
                 case 0xE000:
                     {
                         int VX = V[(opcode & 0x0F00) >> 8];
-                        Debug.WriteLine("KEY CODE FOR DETECTION: " + VX);
                         switch (opcode & 0x00FF)
                         {
                             case 0x009E: //EX9E	Skips the next instruction if the key stored in VX is pressed.
                                 if (VX == keyPressed)
                                 {
-                                    Debug.WriteLine("KEY PRESSED");
                                     pc += 0x04;
                                 }
                                 else
@@ -301,7 +299,6 @@ namespace CHIP8
                                 }
                                 else
                                 {
-                                    Debug.WriteLine("KEY PRESSED");
                                     pc += 0x02;
                                 }
                                 break;
@@ -345,7 +342,6 @@ namespace CHIP8
                                 break;
 
                             case 0x0033: //FX33	Stores the MSB of VX at the address stored in I, middle digit at I + 1, and LSB at I + 2.
-                                int value = VX;
                                 memory[I] = (ushort)((VX - (VX % 100)) / 100);
                                 memory[I + 1] = (ushort)((-(VX % 100)) - (VX % 100 % 10) / 10);
                                 memory[I + 2] = (ushort)(VX - (-(VX % 100)) - (VX % 100 % 10));
@@ -381,7 +377,11 @@ namespace CHIP8
                     break;
             }
             if (delay_timer > 0) delay_timer--;
-            if (sound_timer > 0) sound_timer--;
+            if (sound_timer > 0)
+            {
+                Console.Beep(2000, 100);
+                sound_timer--;
+            }
         }
 
         public bool needsRedraw()

@@ -14,13 +14,15 @@ namespace CHIP8
 
         Rectangle[,] pixels = new Rectangle[64, 32];
 
+        public static int REFRESHRATE = 1, SCALE = 10;
+
         public Display()
         {
             InitializeComponent();
-            
+
             //load the program into the chip
             c.loadFont();
-            c.loadProgram(@"C:\Users\Nico\Documents\Visual Studio 2015\Projects\CHIP8\GAMES\pong.ch8");
+            c.loadProgram(@"C:\Users\Nico\Documents\Visual Studio 2015\Projects\CHIP8\GAMES\pong2.ch8");
 
             //init for window
             displayGrid.Image = new Bitmap(displayGrid.Width, displayGrid.Height);
@@ -30,10 +32,9 @@ namespace CHIP8
                 for (int y = 0; y < 32; y++)
                 {
                     //set the positions for each rect
-                    pixels[x, y] = new Rectangle(x * 10, y * 10, x * 10 + 10, y * 10 + 10);
+                    pixels[x, y] = new Rectangle(x * SCALE, y * SCALE, x * SCALE + SCALE, y * SCALE + SCALE);
                 }
             }
-            display();
             chipWorker.RunWorkerAsync(null);
         }
 
@@ -71,13 +72,11 @@ namespace CHIP8
                 c.run();
                 if (c.needsRedraw())
                 {
-                    Debug.WriteLine("REDRAWING");
+                    //Debug.WriteLine("REDRAWING");
                     display();
                     c.removeDrawFlag();
                 }
-                //Thread.Sleep(1000); //60 hertz
-                //Thread.Sleep(16); //60 hertz
-                Thread.Sleep(1); //
+                Thread.Sleep(REFRESHRATE); //Can be changed to determine speed
             }
         }
 
