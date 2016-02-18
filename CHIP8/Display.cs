@@ -84,25 +84,8 @@ namespace CHIP8
         //keypress event
         private void Display_KeyPress(object sender, KeyPressEventArgs e)
         {
-            //convert w/a and i/k to chip8
-            char chr = e.KeyChar;
-            if (chr == 'w')
-            {
-                chr = (char)1;
-            }
-            else if (chr == 's')
-            {
-                chr = (char)4;
-            }
-            else if (chr == 'i')
-            {
-                chr = (char)12;
-            }
-            else if (chr == 'k')
-            {
-                chr = (char)13;
-            }
-            c.setKey(chr);
+            //map the key to chip8
+            c.setKey((ushort)"1234qwerasdfzxcv".IndexOf(e.KeyChar));
         }
 
         private void Display_KeyUp(object sender, KeyEventArgs e)
