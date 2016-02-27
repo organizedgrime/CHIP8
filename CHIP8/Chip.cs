@@ -11,7 +11,7 @@ namespace CHIP8
         private byte[] keys = new byte[16];
         public byte[] display = new byte[64 * 32];
         private ushort I = 0x0, pc = 0x200;
-        private int stackpointer = 0, sound_timer = 0, delay_timer = 0;
+        public int stackpointer = 0, sound_timer = 0, delay_timer = 0;
 
         public bool needRedraw = false;
         public ushort keyPressed;
@@ -381,8 +381,6 @@ namespace CHIP8
 
             if (sound_timer > 0)
             {
-                //TODO need to modify this, it stops the game for a bit
-                Console.Beep(2000, 100);
                 sound_timer--;
             }
         }

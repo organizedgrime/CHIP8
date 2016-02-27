@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.displayGrid = new System.Windows.Forms.PictureBox();
-            this.chipWorker = new System.ComponentModel.BackgroundWorker();
             ((System.ComponentModel.ISupportInitialize)(this.displayGrid)).BeginInit();
             this.SuspendLayout();
             // 
@@ -40,10 +39,6 @@
             this.displayGrid.Size = new System.Drawing.Size(640, 320);
             this.displayGrid.TabIndex = 0;
             this.displayGrid.TabStop = false;
-            // 
-            // chipWorker
-            // 
-            this.chipWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.chipWorker_DoWork);
             // 
             // Display
             // 
@@ -65,6 +60,5 @@
         #endregion
 
         private System.Windows.Forms.PictureBox displayGrid;
-        private System.ComponentModel.BackgroundWorker chipWorker;
     }
 }
