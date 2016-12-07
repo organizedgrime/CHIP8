@@ -11,9 +11,6 @@ namespace CHIP8
         // Init chip
         Chip c = new Chip();
 
-        // Array of rectangles that are drawn to the screen
-        Rectangle[,] pixels = new Rectangle[64, 32];
-
         // REFRESHRATE measured in Hz
         const int REFRESHRATE = 60, SCALE = 10;
 
@@ -37,15 +34,6 @@ namespace CHIP8
             // Init for window
             displayGrid.Image = new Bitmap(displayGrid.Width, displayGrid.Height);
 
-            for (int x = 0; x < 64; x++)
-            {
-                for (int y = 0; y < 32; y++)
-                {
-                    // Set the positions for each rect
-                    pixels[x, y] = new Rectangle(x * SCALE, y * SCALE, x * SCALE + SCALE, y * SCALE + SCALE);
-                }
-            }
-
             new Thread(chipWorker).Start();
             new Thread(audioWorker).Start();
         }
@@ -57,10 +45,16 @@ namespace CHIP8
                 // Draw black background
                 g.Clear(Color.Black);
 
-                for (int i = 0; i < c.display.Length; i++)
+                int count = 0;
+
+                for (int y = 0; y < 32; y++)
                 {
-                    // Depending on whether the index in display[] is true or false, draw white or black
-                    g.FillRectangle((c.display[i] == 1) ? Brushes.White : Brushes.Black, pixels[i % 64, (int)Math.Floor((i / 64.0))]);
+                    for (int x = 0; x < 64; x++)
+                    {
+                        //pixels[i % 64, (int)Math.Floor((i / 64.0))]
+                        g.FillRectangle((c.display[count] == 1) ? Brushes.White : Brushes.Black, new Rectangle(x * SCALE, y * SCALE, SCALE, SCALE));
+                        count++;
+                    }
                 }
             }
             displayGrid.Invalidate();
