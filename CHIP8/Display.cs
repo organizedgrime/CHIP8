@@ -45,15 +45,12 @@ namespace CHIP8
                 // Draw black background
                 g.Clear(Color.Black);
 
-                int count = 0;
-
                 for (int y = 0; y < 32; y++)
                 {
                     for (int x = 0; x < 64; x++)
                     {
-                        //pixels[i % 64, (int)Math.Floor((i / 64.0))]
-                        g.FillRectangle((c.display[count] == 1) ? Brushes.White : Brushes.Black, new Rectangle(x * SCALE, y * SCALE, SCALE, SCALE));
-                        count++;
+                        // Fill the rectangle based on value in the pixel array
+                        g.FillRectangle((c.display[(x + 64 * y)] == 1) ? Brushes.White : Brushes.Black, new Rectangle(x * SCALE, y * SCALE, SCALE, SCALE));
                     }
                 }
             }
@@ -92,6 +89,7 @@ namespace CHIP8
 
         private void audioWorker()
         {
+            // Infinite loop for the audio worker to run on
             for (;;)
             {
                 if (c.sound_timer > 0)
@@ -116,6 +114,7 @@ namespace CHIP8
 
         private void Display_KeyUp(object sender, KeyEventArgs e)
         {
+            // Reset the keyPressed
             c.keyPressed = 0;
         }
     }
