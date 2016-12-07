@@ -50,6 +50,7 @@
             this.MaximizeBox = false;
             this.Name = "Display";
             this.Text = "Display";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Display_FormClosed);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Display_KeyPress);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Display_KeyUp);
             ((System.ComponentModel.ISupportInitialize)(this.displayGrid)).EndInit();
