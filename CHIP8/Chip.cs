@@ -6,7 +6,7 @@ namespace CHIP8
 {
     class Chip
     {
-        //initialization of memory
+        // Initialization of memory
         private ushort[] memory = new ushort[4096], V = new ushort[16], stack = new ushort[16];
         private byte[] keys = new byte[16];
         public byte[] display = new byte[64 * 32];
@@ -36,19 +36,19 @@ namespace CHIP8
 	        0xF0, 0x80, 0xF0, 0x80, 0x80  // F
         };
 
-        //for opcodes involving random numbers
+        // For opcodes involving random numbers
         private Random rand = new Random();
 
         public void run()
         {
-            //fetch opcode
+            // Fetch opcode
             ushort opcode = (ushort)((memory[pc] << 8) | memory[pc + 1]);
-            //Debug.WriteLine("OPCODE: " + ((int)opcode).ToString("X4"));
+            // Debug.WriteLine("OPCODE: " + ((int)opcode).ToString("X4"));
 
-            //decode opcode
+            // Decode opcode
             switch (opcode & 0xF000)
             {
-                //switch through first bit
+                // Switch through first bit
                 case 0x0000:
                     switch (opcode & 0x00FF)
                     {
@@ -111,7 +111,7 @@ namespace CHIP8
                 case 0x5000: //5XY0	Skips the next instruction if VX equals VY.
                     if (V[(opcode & 0x0F00) >> 8] == (opcode & 0x00F0) >> 4)
                     {
-                        //skip next instruction
+                        // Skip next instruction
                         pc += 0x04;
                     }
                     else
@@ -131,7 +131,7 @@ namespace CHIP8
                     break;
 
                 case 0x8000:
-                    //switch through last bit
+                    // Switch through last bit
                     {
                         int VX = V[(opcode & 0x0F00) >> 8], VY = V[(opcode & 0x00F0) >> 4];
                         switch (opcode & 0x000F)
@@ -157,7 +157,7 @@ namespace CHIP8
                                 break;
 
                             case 0x0004: //8XY4	Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't.
-                                         //check for carry
+                                // Check for carry
                                 if (VX > 0xFF - VY)
                                 {
                                     V[0xF] = 1;
@@ -239,8 +239,8 @@ namespace CHIP8
                     break;
 
                 case 0xD000: //DXYN: Draw a sprite (VX, VY) size (8, N). Sprite is located at I.
-                    //Set variables for future reference
-                    //Set collision flag to false by default
+                    // Set variables for future reference
+                    // Set collision flag to false by default
                     V[0xF] = 0x0;
                     {
                         ushort height = (ushort)(opcode & 0x000F), pixel;
@@ -269,7 +269,7 @@ namespace CHIP8
                                 }
                             }
                         }
-                        //Debug.WriteLine("Draw a sprite at (" + VX + ", " + VY + ") that has the width of 8 pixels and the height of " + (opcode & 0x000F));
+                        // Debug.WriteLine("Draw a sprite at (" + VX + ", " + VY + ") that has the width of 8 pixels and the height of " + (opcode & 0x000F));
                     }
 
                     needRedraw = true;
@@ -393,7 +393,7 @@ namespace CHIP8
                 for (int i = 0; i < program.Length; i++)
                 {
                     memory[0x200 + i] = (ushort)(program[i] & 0xFF);
-                    //Debug.WriteLine("PROG: " +((int)(program[i])).ToString("X4"));
+                    // Debug.WriteLine("PROG: " +((int)(program[i])).ToString("X4"));
                 }
             }
             else
@@ -405,7 +405,7 @@ namespace CHIP8
 
         public void loadFont()
         {
-            //loads font into memory to be displayed later
+            // Loads font into memory to be displayed later
             for (int i = 0; i < font.Length; i++)
             {
                 memory[0x50 + i] = (char)(font[i] & 0xFF);
