@@ -9,14 +9,21 @@ namespace CHIP8
     public partial class Display : Form
     {
         // Init chip
-        Chip c = new Chip();
+        static Chip c = new Chip();
+
+        // Threads
+        Thread chipThread, soundThread;// = new Thread(audioWorker);
+
 
         // REFRESHRATE measured in Hz
-        const int REFRESHRATE = 60, SCALE = 10;
+        const int REFRESHRATE = 60 * 10, SCALE = 10;
 
         public Display()
         {
             InitializeComponent();
+
+            KeyPreview = true;
+
             // Load the program into the chip
             c.loadFont();
 
@@ -34,14 +41,15 @@ namespace CHIP8
             // Init for window
             displayGrid.Image = new Bitmap(displayGrid.Width, displayGrid.Height);
 
-            new Thread(chipWorker).Start();
-            new Thread(audioWorker).Start();
+            chipThread = new Thread(chipWorker);
+            soundThread = new Thread(soundWorker);
         }
 
         public void display()
         {
-            using (Graphics g = Graphics.FromImage(displayGrid.Image))
+            try
             {
+                Graphics g = Graphics.FromImage(displayGrid.Image);
                 // Draw black background
                 g.Clear(Color.Black);
 
@@ -53,6 +61,10 @@ namespace CHIP8
                         g.FillRectangle((c.display[(x + 64 * y)] == 1) ? Brushes.White : Brushes.Black, new Rectangle(x * SCALE, y * SCALE, SCALE, SCALE));
                     }
                 }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
             }
             displayGrid.Invalidate();
         }
@@ -81,13 +93,13 @@ namespace CHIP8
                 ts = frameEnd.Subtract(frameStart);
                 if (ts.Milliseconds > 0.0)
                 {
-                    Debug.WriteLine("Sleeping for {0}ms.", ts.Milliseconds);
+                    //Debug.WriteLine("Sleeping for {0}ms.", ts.Milliseconds);
                     Thread.Sleep(ts.Milliseconds); // Can be changed to determine speed
                 }
             }
         }
 
-        private void audioWorker()
+        private void soundWorker()
         {
             // Infinite loop for the audio worker to run on
             for (;;)
@@ -116,6 +128,33 @@ namespace CHIP8
         {
             // Reset the keyPressed
             c.keyPressed = 0;
+        }
+
+
+        // GUI events
+        private void startButton_Click(object sender, EventArgs e)
+        {
+            if(chipThread.IsAlive)
+            {
+                chipThread.Resume();
+                soundThread.Resume();
+            }
+            else
+            {
+                chipThread.Start();
+                soundThread.Start();
+            }
+        }
+
+        private void pauseButton_Click(object sender, EventArgs e)
+        {
+            chipThread.Suspend();
+            soundThread.Suspend();
+        }
+
+        private void stepButton_Click(object sender, EventArgs e)
+        {
+            // TODO
         }
     }
 }

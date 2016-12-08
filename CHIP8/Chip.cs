@@ -233,6 +233,10 @@ namespace CHIP8
                     pc += 0x02;
                     break;
 
+                case 0xB000: //BNNN Sets PC to the address NNN + V0.
+                    pc = (ushort)((opcode & 0x0FFF) + V[0]);
+                    break;
+
                 case 0xC000: //CXNN	Sets VX to the result of a bitwise and operation on a random number and NN.
                     V[(opcode & 0x0F00) >> 8] = (ushort)(rand.Next(0, 0xFF + 1) & (opcode & 0x00FF));
                     pc += 0x02;
@@ -256,11 +260,11 @@ namespace CHIP8
                                 {
                                     try
                                     {
-                                        if (display[(VX + x_pos + ((VY + y_pos) * 64))] == 1)
+                                        if (display[(VX + x_pos + ((VY + y_pos) * 64)) % display.Length] == 1)
                                         {
                                             V[0xF] = 1;
                                         }
-                                        display[VX + x_pos + ((VY + y_pos) * 64)] ^= 1;
+                                        display[VX + x_pos + ((VY + y_pos) * 64) % display.Length] ^= 1;
                                     }
                                     catch (Exception e)
                                     {
